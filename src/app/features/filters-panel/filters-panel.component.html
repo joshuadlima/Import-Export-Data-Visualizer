@@ -1,0 +1,98 @@
+<div class="header">
+  <h2 class="section-title">Filters</h2>
+  @if (filters.activeCount()) {
+    <p-button label="Clear filters" [text]="true" size="small" (onClick)="filters.clearAll()" />
+  }
+</div>
+
+<div class="field">
+  <label for="periods">Period</label>
+  <p-multiselect
+    inputId="periods"
+    [options]="periodOptions()"
+    [ngModel]="filters.periods()"
+    (ngModelChange)="filters.periods.set($event)"
+    placeholder="All periods"
+    [maxSelectedLabels]="3"
+    selectedItemsLabel="{0} periods"
+    [showClear]="true"
+    appendTo="body"
+    styleClass="w-full"
+  />
+</div>
+
+<div class="field">
+  <label for="search">Item description contains</label>
+  <input
+    id="search"
+    pInputText
+    [ngModel]="filters.search()"
+    (ngModelChange)="setSearch($event)"
+    placeholder="e.g. silent dg set"
+  />
+</div>
+
+<div class="field">
+  <label for="hs">HS code starts with</label>
+  <input
+    id="hs"
+    pInputText
+    [ngModel]="filters.hsPrefix()"
+    (ngModelChange)="setHsPrefix($event)"
+    placeholder="e.g. 850211, 850213"
+  />
+</div>
+
+@for (f of filters.columnFilters(); track f.col) {
+  <div class="field">
+    <div class="field-label">
+      <label>{{ data.columns()[f.col] }}</label>
+      <p-button icon="pi pi-times" [text]="true" size="small" severity="secondary" (onClick)="filters.removeFilter(f.col)" />
+    </div>
+    @if (f.kind === 'values') {
+      <p-multiselect
+        [options]="options(f.col)"
+        [ngModel]="f.values"
+        (ngModelChange)="filters.updateFilter(f.col, { values: $event })"
+        [filter]="true"
+        [virtualScroll]="true"
+        [virtualScrollItemSize]="36"
+        [maxSelectedLabels]="2"
+        selectedItemsLabel="{0} selected"
+        placeholder="Any"
+        [showClear]="true"
+        appendTo="body"
+        styleClass="w-full"
+      />
+    } @else {
+      <div class="range">
+        <p-inputnumber
+          [ngModel]="f.min"
+          (ngModelChange)="filters.updateFilter(f.col, { min: $event ?? null })"
+          placeholder="Min"
+          [maxFractionDigits]="2"
+          styleClass="w-full"
+        />
+        <p-inputnumber
+          [ngModel]="f.max"
+          (ngModelChange)="filters.updateFilter(f.col, { max: $event ?? null })"
+          placeholder="Max"
+          [maxFractionDigits]="2"
+          styleClass="w-full"
+        />
+      </div>
+    }
+  </div>
+}
+
+<p-select
+  [options]="addableColumns()"
+  optionLabel="name"
+  optionValue="index"
+  [ngModel]="null"
+  (ngModelChange)="addFilter($event)"
+  placeholder="+ Add filter on column…"
+  [filter]="true"
+  appendTo="body"
+  styleClass="w-full"
+/>

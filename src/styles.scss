@@ -1,0 +1,29 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  background: var(--p-content-background);
+  color: var(--p-text-color);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.muted {
+  color: var(--p-text-muted-color);
+}
+
+.section-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--p-text-muted-color);
+}

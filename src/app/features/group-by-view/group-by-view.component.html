@@ -1,0 +1,52 @@
+<div class="toolbar">
+  <label for="groupBy">Group by</label>
+  <p-select
+    inputId="groupBy"
+    [options]="columnOptions()"
+    optionLabel="name"
+    optionValue="key"
+    [ngModel]="groupKey()"
+    (ngModelChange)="groupKey.set($event)"
+    [filter]="true"
+    appendTo="body"
+  />
+  <span class="muted">{{ formatNumber(groups().length) }} groups · click one to filter to it</span>
+</div>
+
+<div class="table-wrap">
+  <p-table
+    [value]="groups()"
+    [scrollable]="true"
+    scrollHeight="flex"
+    [virtualScroll]="true"
+    [virtualScrollItemSize]="37"
+    size="small"
+    [rowHover]="true"
+    sortField="usd"
+    [sortOrder]="-1"
+  >
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="label">{{ data.columns()[groupCol()] }} <p-sortIcon field="label" /></th>
+        <th pSortableColumn="count" class="num">Rows <p-sortIcon field="count" /></th>
+        <th pSortableColumn="usd" class="num">Total value (USD) <p-sortIcon field="usd" /></th>
+        <th pSortableColumn="share" class="num">Share <p-sortIcon field="share" /></th>
+        <th>Quantity</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-g>
+      <tr (click)="drillDown(g)">
+        <td class="label" [title]="g.label">{{ g.label }}</td>
+        <td class="num">{{ formatNumber(g.count) }}</td>
+        <td class="num">{{ formatUsd(g.usd) }}</td>
+        <td class="num">{{ (g.share * 100).toFixed(1) }}%</td>
+        <td class="qty" [title]="g.quantity">{{ g.quantity }}</td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="5" class="muted empty">No rows match the current filters.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

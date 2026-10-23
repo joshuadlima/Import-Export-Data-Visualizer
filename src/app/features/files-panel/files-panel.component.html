@@ -1,0 +1,62 @@
+<label
+  class="dropzone"
+  [class.dragging]="dragging()"
+  (dragover)="$event.preventDefault(); dragging.set(true)"
+  (dragleave)="dragging.set(false)"
+  (drop)="onDrop($event)"
+>
+  <i class="pi pi-upload"></i>
+  <span>Drop .xlsx files here or <u>browse</u></span>
+  <input #picker type="file" accept=".xlsx" multiple hidden (change)="onPick(picker)" />
+</label>
+
+@if (data.jobs().length) {
+  <ul class="list">
+    @for (job of data.jobs(); track job.name) {
+      <li [class.error]="job.status === 'error'">
+        @if (job.status === 'error') {
+          <i class="pi pi-exclamation-circle"></i>
+        } @else {
+          <p-progress-spinner strokeWidth="6" styleClass="spinner" />
+        }
+        <span class="name" [title]="job.name">{{ job.name }}</span>
+        @if (job.status === 'error') {
+          <span class="detail" [title]="job.error ?? ''">{{ job.error }}</span>
+          <p-button icon="pi pi-times" [text]="true" size="small" (onClick)="data.dismissJob(job.name)" />
+        } @else {
+          <span class="detail muted">{{ job.status === 'queued' ? 'Queued' : 'Parsing…' }}</span>
+        }
+      </li>
+    }
+  </ul>
+}
+
+<div class="header">
+  <h2 class="section-title">
+    Files ({{ data.files().length }}) · {{ formatNumber(totalRows()) }} rows
+  </h2>
+  @if (data.files().length) {
+    <p-button label="Clear all" [text]="true" size="small" severity="danger" (onClick)="clearAll()" />
+  }
+</div>
+
+@if (data.loading()) {
+  <p class="muted">Loading saved files…</p>
+} @else if (!data.files().length) {
+  <p class="muted">No files loaded yet.</p>
+}
+
+<ul class="list files">
+  @for (file of fileRows(); track file.name) {
+    <li>
+      @if (file.warning) {
+        <i class="pi pi-exclamation-triangle warn" [pTooltip]="file.warning" tooltipPosition="right"></i>
+      } @else {
+        <i class="pi pi-file muted"></i>
+      }
+      <span class="name" [title]="file.name">{{ file.name }}</span>
+      <span class="detail muted">{{ formatNumber(file.rowCount) }}</span>
+      <p-button icon="pi pi-trash" [text]="true" size="small" severity="secondary" (onClick)="remove(file.name)" />
+    </li>
+  }
+</ul>

@@ -1,0 +1,26 @@
+<aside class="sidebar">
+  <h1>Trade Data Explorer</h1>
+  <app-files-panel />
+  <app-filters-panel />
+</aside>
+
+<main>
+  <div class="tabs">
+    <p-selectbutton
+      [options]="viewOptions"
+      optionLabel="label"
+      optionValue="value"
+      [ngModel]="view()"
+      (ngModelChange)="$event && view.set($event)"
+      [allowEmpty]="false"
+    />
+    @if (filters.activeCount()) {
+      <span class="muted">{{ filters.activeCount() }} filter{{ filters.activeCount() === 1 ? '' : 's' }} active</span>
+    }
+  </div>
+  @if (view() === 'rows') {
+    <app-rows-view />
+  } @else {
+    <app-group-by-view (drilledDown)="view.set('rows')" />
+  }
+</main>

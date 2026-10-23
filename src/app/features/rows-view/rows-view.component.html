@@ -1,0 +1,97 @@
+<div class="toolbar">
+  <div class="totals">
+    <span><strong>{{ formatNumber(filters.totals().count) }}</strong> rows</span>
+    @if (filters.totals().usd !== null) {
+      <span><strong>{{ formatUsd(filters.totals().usd!) }}</strong> total value</span>
+    }
+    @for (q of filters.totals().quantity.slice(0, 3); track q.unit) {
+      <span><strong>{{ formatNumber(q.sum) }}</strong> {{ q.unit }}</span>
+    }
+    @if (filters.totals().quantity.length > 3) {
+      <span class="muted more" [pTooltip]="quantityTooltip()" tooltipStyleClass="pre">
+        +{{ filters.totals().quantity.length - 3 }} units
+      </span>
+    }
+  </div>
+  <p-multiselect
+    [options]="columnOptions()"
+    optionLabel="name"
+    optionValue="key"
+    [ngModel]="visibleKeys()"
+    (ngModelChange)="setVisible($event)"
+    [filter]="true"
+    placeholder="Columns"
+    selectedItemsLabel="{0} columns"
+    [maxSelectedLabels]="0"
+    appendTo="body"
+  />
+  <p-button
+    icon="pi pi-download"
+    label="CSV"
+    severity="secondary"
+    [disabled]="!filters.filteredRows().length"
+    (onClick)="exportCsv()"
+  />
+</div>
+
+<div class="table-wrap">
+  <p-table
+    [value]="filters.sortedRows()"
+    [columns]="visibleColumns()"
+    [scrollable]="true"
+    scrollHeight="flex"
+    [virtualScroll]="true"
+    [virtualScrollItemSize]="37"
+    size="small"
+    [rowHover]="true"
+    [tableStyle]="{ 'table-layout': 'fixed', width: 'max-content' }"
+  >
+    <ng-template #header let-columns>
+      <tr>
+        @for (c of columns; track c.index) {
+          <th [style.width]="c.width" [class.num]="c.numeric" class="sortable" (click)="filters.toggleSort(c.index)">
+            {{ c.name }}
+            @if (filters.sort()?.col === c.index) {
+              <i class="pi" [class.pi-sort-amount-up-alt]="filters.sort()!.dir === 1" [class.pi-sort-amount-down]="filters.sort()!.dir === -1"></i>
+            }
+          </th>
+        }
+      </tr>
+    </ng-template>
+    <ng-template #body let-row let-columns="columns">
+      <tr (click)="selected.set(row)">
+        @for (c of columns; track c.index) {
+          <td [style.width]="c.width" [class.num]="c.numeric" [title]="formatCell(row[c.index])">
+            {{ formatCell(row[c.index]) }}
+          </td>
+        }
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage let-columns>
+      <tr>
+        <td [attr.colspan]="columns.length" class="muted empty">
+          {{ data.files().length ? 'No rows match the current filters.' : 'Upload some .xlsx files to get started.' }}
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-drawer
+  [visible]="selected() !== null"
+  (visibleChange)="!$event && selected.set(null)"
+  position="right"
+  header="Row details"
+  styleClass="details-drawer"
+>
+  @if (selected(); as row) {
+    <dl class="details">
+      @for (name of data.columns(); track $index) {
+        @if (formatCell(row[$index]); as value) {
+          <dt>{{ name }}</dt>
+          <dd>{{ value }}</dd>
+        }
+      }
+    </dl>
+  }
+</p-drawer>
